@@ -1,31 +1,30 @@
 import traceback
-
 import requests
-from bs4 import SoupStrainer, BeautifulSoup
+import SetData
+import BuildData
+import ParseData
 
-import SetData as Sd
-import BuildData as Bd
-import ParseData as Pd
+from bs4 import SoupStrainer, BeautifulSoup
 
 
 def loopThroughScrapePages(provider, pageNumber):
     try:
         running = True
         while running:
-            fullURL = Bd.buildFullURL(provider, str(pageNumber))  # "" (blank = netflix)
+            fullURL = BuildData.buildFullURL(provider, str(pageNumber))  # "" (blank = netflix)
             page = getPageFromURL(fullURL)
 
             if hasCardTitles(page):
                 cardBodies = getCardBodiesFromPage(page)
                 if cardBodies:
-                    Bd.buildJsonResults(cardBodies, provider)
+                    BuildData.buildJsonResults(cardBodies, provider)
                     pageNumber += 1
                 else:
                     running = False
             else:
                 running = False
 
-        Sd.changeProviders(provider)
+        SetData.changeProviders(provider)
     except Exception:
         traceback.print_exc()
         print("getAndParseHtmlTitles() Catch")
@@ -38,7 +37,6 @@ def hasCardTitles(page):
 
     if cardTitles:
         return True
-
     return False
 
 
@@ -60,18 +58,22 @@ def getServiceButtonFromPage(page):
 
 def getPageFromURL(url):
     requests_session = requests.Session()
-    return requests_session.get(url)
+    page = requests_session.get(url)
+
+    return page
 
 
 def getCardBodiesFromPage(page):
     cardBodyFilter = SoupStrainer('div', attrs={'class': 'card-body'})
     soupCardBody = BeautifulSoup(page.content, 'lxml', parse_only=cardBodyFilter)
-    return soupCardBody.find_all('div', attrs={'class': 'card-body'})
+    cardBodies = soupCardBody.find_all('div', attrs={'class': 'card-body'})
+
+    return cardBodies
 
 
 def getStreamServiceLinkAndType(provider, title):
     streamLink = ""
-    baseSiteURL = Pd.getFromConfig("URLs", "baseSiteURL")
+    baseSiteURL = ParseData.getFromConfig("URLs", "baseSiteURL")
 
     serviceLink = baseSiteURL + provider + 'title/' + title
     page = getPageFromURL(serviceLink)

@@ -1,4 +1,4 @@
-import WebScrape as Ws
+import WebScrape
 import main as M
 
 
@@ -8,7 +8,7 @@ def changeProviders(currentProvider):
         if M.providerList:
             nextProvider = M.providerList[0]
             pageNumber = '0'
-            Ws.loopThroughScrapePages(nextProvider, pageNumber)
+            WebScrape.loopThroughScrapePages(nextProvider, pageNumber)
         else:
             return
 

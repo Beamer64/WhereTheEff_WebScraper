@@ -1,8 +1,8 @@
 import traceback
 import boto3
+import ParseData
 
-import main as M
-import ParseData as Pd
+import main as Main
 
 from boto3.dynamodb.conditions import Attr
 from termcolor import colored
@@ -10,7 +10,7 @@ from termcolor import colored
 
 def insertIntoDB(newID, title, year, service, link, posterURL, plot, tmdbID):
     try:
-        if plot != '' or tmdbID != '':
+        if plot != {} or tmdbID != {}:
             print("")
             # table.put_item(
             #     Item={
@@ -26,10 +26,10 @@ def insertIntoDB(newID, title, year, service, link, posterURL, plot, tmdbID):
             #     }
             # )
         else:
-            M.badCalls += 1
+            Main.badCalls += 1
             print(colored("BAD CALL", "red"))
             print("")
-            M.badAPIcalls.append({
+            Main.badAPIcalls.append({
                 "id": str(newID),
                 "title": title,
                 "year": year,
@@ -41,11 +41,11 @@ def insertIntoDB(newID, title, year, service, link, posterURL, plot, tmdbID):
         print("insertIntoDB() Catch")
 
 
-def exists(title, year):
-    aws_access_key_id = Pd.getFromConfig("DynamoDB", "aws_access_key_id")
-    aws_secret_access_key = Pd.getFromConfig("DynamoDB", "aws_secret_access_key")
-    region = Pd.getFromConfig("DynamoDB", "region")
-    endpoint_url = Pd.getFromConfig("DynamoDB", "endpoint_url")
+def titleExists(title, year):
+    aws_access_key_id = ParseData.getFromConfig("DynamoDB", "aws_access_key_id")
+    aws_secret_access_key = ParseData.getFromConfig("DynamoDB", "aws_secret_access_key")
+    region = ParseData.getFromConfig("DynamoDB", "region")
+    endpoint_url = ParseData.getFromConfig("DynamoDB", "endpoint_url")
 
     dynamo = boto3.resource('dynamodb', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name=region, endpoint_url=endpoint_url)
     tableName = 'where-the-eff-dynamodb-table'
